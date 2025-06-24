@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.dipantau.R
-import com.example.dipantau.model.Admin
 import com.example.dipantau.model.Resource
+import com.example.dipantau.model.User // Mengganti Admin dengan User
 import com.example.dipantau.ui.component.card.AdminCard
 import com.example.dipantau.ui.theme.ProductSans
 import com.example.dipantau.viewmodel.AdminViewModel
@@ -41,14 +41,12 @@ fun KelolaAdminScreen(
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     var showResetPasswordDialog by remember { mutableStateOf(false) }
     var showToggleActiveDialog by remember { mutableStateOf(false) }
-    var selectedAdmin by remember { mutableStateOf<Admin?>(null) }
+    var selectedAdmin by remember { mutableStateOf<User?>(null) } // Mengganti Admin dengan User
     var newPassword by remember { mutableStateOf("") }
 
     val updateState by viewModel.updateAdminResult.collectAsState()
     val deleteState by viewModel.deleteAdminResult.collectAsState()
     val resetPasswordState by viewModel.resetPasswordResult.collectAsState()
-    val activateState by viewModel.activateResult.collectAsState()
-    val deactivateState by viewModel.deactivateResult.collectAsState()
     val adminListState by viewModel.adminList.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -106,40 +104,6 @@ fun KelolaAdminScreen(
                     snackbarMessage = it.message ?: "Gagal mereset password admin"
                     showSnackbar = true
                     viewModel.resetResetPasswordResult()
-                }
-                else -> {}
-            }
-        }
-    }
-
-    LaunchedEffect(activateState, deactivateState) {
-        activateState?.let {
-            when (it) {
-                is Resource.Success -> {
-                    snackbarMessage = "Admin berhasil diaktifkan"
-                    showSnackbar = true
-                    viewModel.resetActivateResult()
-                }
-                is Resource.Error -> {
-                    snackbarMessage = it.message ?: "Gagal mengaktifkan admin"
-                    showSnackbar = true
-                    viewModel.resetActivateResult()
-                }
-                else -> {}
-            }
-        }
-
-        deactivateState?.let {
-            when (it) {
-                is Resource.Success -> {
-                    snackbarMessage = "Admin berhasil dinonaktifkan"
-                    showSnackbar = true
-                    viewModel.resetDeactivateResult()
-                }
-                is Resource.Error -> {
-                    snackbarMessage = it.message ?: "Gagal menonaktifkan admin"
-                    showSnackbar = true
-                    viewModel.resetDeactivateResult()
                 }
                 else -> {}
             }
@@ -373,11 +337,11 @@ fun KelolaAdminScreen(
             admin = selectedAdmin!!,
             onDismiss = { showToggleActiveDialog = false },
             onConfirm = {
-                if (selectedAdmin!!.isActive) {
-                    viewModel.deactivateAdmin(selectedAdmin!!.id)
-                } else {
-                    viewModel.activateAdmin(selectedAdmin!!.id)
-                }
+                // Menggunakan fungsi update untuk mengubah status aktif
+                viewModel.updateAdmin(
+                    id = selectedAdmin!!.id,
+                    isActive = !selectedAdmin!!.isActive
+                )
                 showToggleActiveDialog = false
             }
         )
@@ -397,7 +361,7 @@ fun DeleteConfirmationDialog(
         containerColor = colorScheme.onPrimary,
         title = {
             Text(
-                text = "Hapus Admin",
+                text = "Hap极 Admin",
                 fontFamily = ProductSans,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onTertiary
@@ -513,7 +477,7 @@ fun ResetPasswordDialog(
 
 @Composable
 fun ToggleActiveDialog(
-    admin: Admin,
+    admin: User, // Pastikan ini adalah User
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -572,3 +536,4 @@ fun ToggleActiveDialog(
         }
     )
 }
+

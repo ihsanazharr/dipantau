@@ -20,12 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.dipantau.model.Admin
+import com.example.dipantau.model.User // Menggunakan model User
 import com.example.dipantau.ui.theme.ProductSans
 
 @Composable
 fun AdminCard(
-    admin: Admin,
+    admin: User, // Menggunakan model User
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onResetPasswordClick: () -> Unit = {},
@@ -39,23 +39,20 @@ fun AdminCard(
     admin.email.take(1).uppercase()
 
     // Menentukan warna acak untuk avatar jika tidak ada foto profil
-    val avatarColor = androidx.compose.ui.graphics.Color(
+    val avatarColor = Color(
         red = (admin.id * 123) % 256 / 255f,
         green = (admin.id * 456) % 256 / 255f,
         blue = (admin.id * 789) % 256 / 255f
     )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.onPrimary),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
             // Informasi utama admin
             Row(
@@ -64,10 +61,7 @@ fun AdminCard(
             ) {
                 // Avatar/Foto profil
                 Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(avatarColor),
+                    modifier = Modifier.size(56.dp).clip(CircleShape).background(avatarColor),
                     contentAlignment = Alignment.Center
                 ) {
                     if (admin.profilePicture != null) {
@@ -90,9 +84,7 @@ fun AdminCard(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 // Informasi admin
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = admin.fullName ?: admin.username ?: admin.email,
                         fontWeight = FontWeight.Bold,
@@ -112,9 +104,7 @@ fun AdminCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         // Badge role
                         Surface(
                             shape = RoundedCornerShape(12.dp),
@@ -147,17 +137,6 @@ fun AdminCard(
                                 fontFamily = ProductSans
                             )
                         }
-                    }
-
-                    // Tampilkan himpunan jika ada
-                    admin.himpunan?.let {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Himpunan: ${it.name}",
-                            fontSize = 14.sp,
-                            color = colorScheme.tertiary,
-                            fontFamily = ProductSans
-                        )
                     }
 
                     // Tampilkan nomor telepon jika ada

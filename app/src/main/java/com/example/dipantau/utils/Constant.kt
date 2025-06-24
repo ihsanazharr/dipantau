@@ -2,7 +2,7 @@ package com.example.dipantau.utils
 
 object Constants {
     // API Base URL
-    const val BASE_URL = "http://192.168.137.1:5000/api/"
+    const val BASE_URL = "http://192.168.1.8:5000/api/"
 
     // SharedPreferences
     const val PREF_NAME = "HimpunanAppPrefs"

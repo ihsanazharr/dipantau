@@ -1,8 +1,8 @@
 package com.example.dipantau.data.repositories
 
 import com.example.dipantau.model.Himpunan
-import com.example.dipantau.model.HimpunanDetail
-import com.example.dipantau.model.PagedResponse
+import com.example.dipantau.model.HimpunanRequest
+import com.example.dipantau.model.HimpunanResponse
 import com.example.dipantau.model.Resource
 
 interface HimpunanRepository {
@@ -11,11 +11,10 @@ interface HimpunanRepository {
         limit: Int = 10,
         search: String = "",
         status: String = "active"
-    ): Resource<PagedResponse<Himpunan>>
-
-    suspend fun createHimpunan(himpunan: Himpunan): Resource<Himpunan>
-    suspend fun updateHimpunan(id: Int, himpunan: Himpunan): Resource<Himpunan>
+    ): Resource<HimpunanResponse>
+    suspend fun getHimpunanById(id: Int): Resource<Himpunan>
+    suspend fun createHimpunan(himpunanRequest: HimpunanRequest): Resource<Himpunan>
+    suspend fun updateHimpunan(id: Int, himpunanRequest: HimpunanRequest): Resource<Himpunan>
     suspend fun deleteHimpunan(id: Int): Resource<Unit>
-    suspend fun getMyHimpunan(): Resource<PagedResponse<Himpunan>>
-    suspend fun getHimpunanById(id: Int): Resource<HimpunanDetail>
+    suspend fun getMyHimpunan(): Resource<Himpunan>
 }

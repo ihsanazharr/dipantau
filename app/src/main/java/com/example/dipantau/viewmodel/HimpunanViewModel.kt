@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dipantau.data.repositories.HimpunanRepository
 import com.example.dipantau.model.Himpunan
-import com.example.dipantau.model.HimpunanDetail
-import com.example.dipantau.model.PagedResponse
+import com.example.dipantau.model.HimpunanRequest
+import com.example.dipantau.model.HimpunanResponse
 import com.example.dipantau.model.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,11 +18,11 @@ class HimpunanViewModel @Inject constructor(
     private val himpunanRepository: HimpunanRepository
 ) : ViewModel() {
 
-    private val _himpunanList = MutableStateFlow<Resource<PagedResponse<Himpunan>>>(Resource.Loading)
-    val himpunanList: StateFlow<Resource<PagedResponse<Himpunan>>> = _himpunanList
+    private val _himpunanList = MutableStateFlow<Resource<HimpunanResponse>>(Resource.Loading)
+    val himpunanList: StateFlow<Resource<HimpunanResponse>> = _himpunanList
 
-    private val _himpunanDetail = MutableStateFlow<Resource<HimpunanDetail>>(Resource.Loading)
-    val himpunanDetail: StateFlow<Resource<HimpunanDetail>> = _himpunanDetail
+    private val _himpunanDetail = MutableStateFlow<Resource<Himpunan>>(Resource.Loading)
+    val himpunanDetail: StateFlow<Resource<Himpunan>> = _himpunanDetail
 
     private val _createHimpunanResult = MutableStateFlow<Resource<Himpunan>?>(null)
     val createHimpunanResult: StateFlow<Resource<Himpunan>?> = _createHimpunanResult
@@ -33,8 +33,9 @@ class HimpunanViewModel @Inject constructor(
     private val _deleteHimpunanResult = MutableStateFlow<Resource<Unit>?>(null)
     val deleteHimpunanResult: StateFlow<Resource<Unit>?> = _deleteHimpunanResult
 
-    private val _myHimpunanList = MutableStateFlow<Resource<List<Himpunan>>>(Resource.Loading)
-    val myHimpunanList: StateFlow<Resource<List<Himpunan>>> = _myHimpunanList
+    // Untuk himpunan milik user (bukan list)
+    private val _myHimpunan = MutableStateFlow<Resource<Himpunan>>(Resource.Loading)
+    val myHimpunan: StateFlow<Resource<Himpunan>> = _myHimpunan
 
     fun getAllHimpunan(
         page: Int = 1,
@@ -53,19 +54,30 @@ class HimpunanViewModel @Inject constructor(
         }
     }
 
-    fun getMyHimpunan() {
+    fun getHimpunanById(id: Int) {
         viewModelScope.launch {
-            _himpunanList.value = Resource.Loading
+            _himpunanDetail.value = Resource.Loading
             try {
-                val result = himpunanRepository.getMyHimpunan()
-                _himpunanList.value = result
+                val result = himpunanRepository.getHimpunanById(id)
+                _himpunanDetail.value = result
             } catch (e: Exception) {
-                _himpunanList.value = Resource.Error(e.message ?: "Terjadi kesalahan saat mengambil himpunan saya")
+                _himpunanDetail.value = Resource.Error(e.message ?: "Terjadi kesalahan saat mengambil detail himpunan")
             }
         }
     }
 
-    // Fungsi untuk membuat himpunan baru (diperbarui untuk menerima semua parameter)
+    fun getMyHimpunan() {
+        viewModelScope.launch {
+            _myHimpunan.value = Resource.Loading
+            try {
+                val result = himpunanRepository.getMyHimpunan()
+                _myHimpunan.value = result
+            } catch (e: Exception) {
+                _myHimpunan.value = Resource.Error(e.message ?: "Terjadi kesalahan saat mengambil himpunan saya")
+            }
+        }
+    }
+
     fun createHimpunan(
         name: String,
         aka: String,
@@ -78,23 +90,16 @@ class HimpunanViewModel @Inject constructor(
         viewModelScope.launch {
             _createHimpunanResult.value = Resource.Loading
             try {
-                val himpunan = Himpunan(
-                    id = 0, // ID akan diisi oleh server
+                val request = HimpunanRequest(
                     name = name,
                     aka = aka,
                     description = description,
-                    logo = null,
                     foundedDate = foundedDate,
-                    status = "active",
                     contactEmail = contactEmail,
                     contactPhone = contactPhone,
-                    address = address,
-                    adminId = 0, // Akan diisi oleh server
-                    admin = null,
-                    createdAt = "",
-                    updatedAt = ""
+                    address = address
                 )
-                val result = himpunanRepository.createHimpunan(himpunan)
+                val result = himpunanRepository.createHimpunan(request)
                 _createHimpunanResult.value = result
 
                 // Refresh daftar himpunan jika berhasil
@@ -120,31 +125,16 @@ class HimpunanViewModel @Inject constructor(
         viewModelScope.launch {
             _updateHimpunanResult.value = Resource.Loading
             try {
-                // Ambil data himpunan saat ini
-                val currentState = _himpunanList.value
-                val currentHimpunan = if (currentState is Resource.Success) {
-                    currentState.data.data.find { it.id == id }
-                } else null
-
-                // Buat objek himpunan untuk update
-                val himpunan = Himpunan(
-                    id = id,
-                    name = name ?: currentHimpunan?.name ?: "",
-                    aka = aka ?: currentHimpunan?.aka ?: "",
-                    description = description ?: currentHimpunan?.description,
-                    logo = currentHimpunan?.logo,
-                    foundedDate = foundedDate ?: currentHimpunan?.foundedDate,
-                    status = currentHimpunan?.status ?: "active",
-                    contactEmail = contactEmail ?: currentHimpunan?.contactEmail,
-                    contactPhone = contactPhone ?: currentHimpunan?.contactPhone,
-                    address = address ?: currentHimpunan?.address,
-                    adminId = currentHimpunan?.adminId ?: 0,
-                    admin = currentHimpunan?.admin,
-                    createdAt = currentHimpunan?.createdAt ?: "",
-                    updatedAt = currentHimpunan?.updatedAt ?: ""
+                val request = HimpunanRequest(
+                    name = name ?: "", // Berikan nilai default jika null
+                    aka = aka ?: "",
+                    description = description,
+                    foundedDate = foundedDate,
+                    contactEmail = contactEmail,
+                    contactPhone = contactPhone,
+                    address = address
                 )
-
-                val result = himpunanRepository.updateHimpunan(id, himpunan)
+                val result = himpunanRepository.updateHimpunan(id, request)
                 _updateHimpunanResult.value = result
 
                 // Refresh daftar himpunan jika berhasil
@@ -164,6 +154,7 @@ class HimpunanViewModel @Inject constructor(
                 val result = himpunanRepository.deleteHimpunan(id)
                 _deleteHimpunanResult.value = result
 
+                // Refresh daftar himpunan jika berhasil
                 if (result is Resource.Success) {
                     getAllHimpunan()
                 }

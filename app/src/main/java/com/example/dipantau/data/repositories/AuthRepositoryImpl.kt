@@ -1,16 +1,23 @@
 package com.example.dipantau.data.repositories
 
 import com.example.dipantau.data.remote.ApiService
+
 import com.example.dipantau.model.*
-import com.example.dipantau.utils.Constants
+
 import com.example.dipantau.utils.SessionManager
+
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+
 import okhttp3.MultipartBody
+
 import okhttp3.RequestBody.Companion.asRequestBody
+
 import java.io.File
+
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
+
     private val apiService: ApiService,
     private val sessionManager: SessionManager
 ) : BaseRepository(), AuthRepository {
@@ -18,14 +25,11 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun login(email: String, password: String): Resource<AuthResponse> {
         val loginRequest = LoginRequest(email, password)
         val result: Resource<AuthResponse> = safeApiCall { apiService.loginUser(loginRequest) }
-
         if (result is Resource.Success) {
             sessionManager.saveAuthResponse(result.data)
         }
-
         return result
     }
-
     override suspend fun register(
         email: String,
         password: String,
@@ -34,18 +38,14 @@ class AuthRepositoryImpl @Inject constructor(
     ): Resource<AuthResponse> {
         val registerRequest = RegisterRequest(email, password, fullName, phoneNumber)
         val result: Resource<AuthResponse> = safeApiCall { apiService.registerUser(registerRequest) }
-
         if (result is Resource.Success) {
             sessionManager.saveAuthResponse(result.data)
         }
-
         return result
     }
-
     override suspend fun getUserProfile(): Resource<User> {
         return safeApiCall { apiService.getUserProfile() }
     }
-
     override suspend fun updateUserProfile(
         fullName: String?,
         phoneNumber: String?,
@@ -53,65 +53,74 @@ class AuthRepositoryImpl @Inject constructor(
     ): Resource<User> {
         val updateRequest = UpdateProfileRequest(fullName, phoneNumber, username)
         val result: Resource<User> = safeApiCall { apiService.updateUserProfile(updateRequest) }
-
         if (result is Resource.Success) {
             sessionManager.saveUser(result.data)
         }
-
         return result
     }
-
     override suspend fun updateProfilePicture(imageFile: File): Resource<User> {
         val requestFile = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("profilePicture", imageFile.name, requestFile)
-
         val result: Resource<User> = safeApiCall { apiService.updateProfilePicture(body) }
-
         if (result is Resource.Success) {
             sessionManager.saveUser(result.data)
         }
-
         return result
     }
 
     override suspend fun forgotPassword(email: String): Resource<String> {
-        TODO("Not yet implemented")
+        val forgotPasswordRequest = ForgotPasswordRequest(email)
+        return try {
+            val response = apiService.forgotPassword(forgotPasswordRequest)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true) {
+                    Resource.Success(body.message ?: "Permintaan berhasil dikirim")
+                } else {
+                    Resource.Error(body?.message ?: "Terjadi kesalahan")
+                }
+            } else {
+                Resource.Error("Terjadi kesalahan: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error("Terjadi kesalahan: ${e.message}")
+        }
     }
 
     override suspend fun resetPassword(token: String, password: String): Resource<String> {
-        TODO("Not yet implemented")
+        val resetPasswordRequest = ResetPasswordRequest(token, password)
+        return try {
+            val response = apiService.resetPassword(resetPasswordRequest)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true) {
+                    Resource.Success(body.message ?: "Password berhasil direset")
+                } else {
+                    Resource.Error(body?.message ?: "Terjadi kesalahan")
+                }
+            } else {
+                Resource.Error("Terjadi kesalahan: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error("Terjadi kesalahan: ${e.message}")
+        }
     }
-
-//    override suspend fun forgotPassword(email: String): Resource<String> {
-//        val forgotPasswordRequest = ForgotPasswordRequest(email)
-//        return safeApiCall { apiService.forgotPassword(forgotPasswordRequest) }
-//    }
-
-//    override suspend fun resetPassword(token: String, password: String): Resource<String> {
-//        val resetPasswordRequest = ResetPasswordRequest(token, password)
-//        return safeApiCall { apiService.resetPassword(resetPasswordRequest) }
-//    }
 
     override fun logout() {
         sessionManager.logout()
     }
-
     override fun isLoggedIn(): Boolean {
         return sessionManager.isLoggedIn()
     }
-
     override fun isAdmin(): Boolean {
         return sessionManager.isAdmin()
     }
-
     override fun isSuperAdmin(): Boolean {
         return sessionManager.isSuperAdmin()
     }
-
     override fun getToken(): String? {
         return sessionManager.getToken()
     }
-
     override fun getUserId(): Int {
         return sessionManager.getUserId()
     }

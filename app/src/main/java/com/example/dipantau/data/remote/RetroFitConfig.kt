@@ -10,27 +10,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * Konfigurasi Retrofit untuk API
- */
 object RetrofitConfig {
-
-    /**
-     * Membuat interceptor autentikasi yang menambahkan token pada setiap request
-     */
     private fun getAuthInterceptor(sessionManager: SessionManager): Interceptor {
         return Interceptor { chain ->
             val originalRequest = chain.request()
             val token = sessionManager.getToken()
 
             val requestBuilder = originalRequest.newBuilder()
-
-            // Tambahkan token jika tersedia
             if (!token.isNullOrEmpty()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }
-
-            // Tambahkan header content type dan accept
             requestBuilder.addHeader("Content-Type", "application/json")
             requestBuilder.addHeader("Accept", "application/json")
 
@@ -39,11 +28,7 @@ object RetrofitConfig {
         }
     }
 
-    /**
-     * Fungsi untuk mendapatkan instance ApiService
-     */
     fun getApiService(sessionManager: SessionManager): ApiService {
-        // Logging interceptor untuk debug
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (Constants.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -52,7 +37,6 @@ object RetrofitConfig {
             }
         }
 
-        // Setup OkHttpClient dengan interceptor
         val client = OkHttpClient.Builder()
             .addInterceptor(getAuthInterceptor(sessionManager))
             .addInterceptor(loggingInterceptor)
@@ -61,19 +45,16 @@ object RetrofitConfig {
             .writeTimeout(60, TimeUnit.SECONDS)
             .build()
 
-        // Gson builder dengan format tanggal yang sesuai
         val gson = GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             .create()
 
-        // Setup Retrofit
         val retrofit = Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
 
-        // Return implementasi ApiService
         return retrofit.create(ApiService::class.java)
     }
 }

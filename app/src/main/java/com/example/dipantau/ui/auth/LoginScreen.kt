@@ -1,9 +1,5 @@
-package com.example.dipantau.ui
+package com.example.dipantau.ui.auth
 
-import android.app.Activity
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,8 +7,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -21,80 +19,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.dipantau.R
-import com.example.dipantau.ui.theme.DiPantauTheme
-import com.example.dipantau.ui.theme.ProductSans
-import android.content.Intent
-import android.widget.Toast
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.dipantau.model.Resource
-import com.example.dipantau.ui.auth.LupaPasswordScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.dipantau.R
 import com.example.dipantau.model.AuthResponse
-import com.example.dipantau.ui.screen.superAdmin.SuperAdminMainActivity
-import com.example.dipantau.utils.Constants
+import com.example.dipantau.model.Resource
+import com.example.dipantau.ui.theme.ProductSans
 import com.example.dipantau.viewmodel.AuthViewModel
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            DiPantauTheme {
-                val navController = rememberNavController()
-                val context = LocalContext.current
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "login"
-                ) {
-                    composable("login") {
-                        LoginScreen(
-                            onNavigateToForgotPassword = {
-                                navController.navigate("lupa_password")
-                            },
-                            onLoginSuccess = { role ->
-                                when (role) {
-                                    Constants.ROLE_SUPER_ADMIN -> {
-                                        val intent = Intent(context, SuperAdminMainActivity::class.java)
-                                        context.startActivity(intent)
-                                        (context as? Activity)?.finish()
-                                    }
-//                                    Constants.ROLE_ADMIN -> {
-//                                        // Buat AdminMainActivity jika belum ada
-//                                        val intent = Intent(context, AdminMainActivity::class.java)
-//                                        context.startActivity(intent)
-//                                        (context as? Activity)?.finish()
-//                                    }
-//                                    Constants.ROLE_MEMBER -> {
-//                                        // Buat MemberMainActivity jika belum ada
-//                                        val intent = Intent(context, MemberMainActivity::class.java)
-//                                        context.startActivity(intent)
-//                                        (context as? Activity)?.finish()
-//                                    }
-                                    else -> {
-                                        Toast.makeText(context, "Role tidak dikenali", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    composable("lupa_password") {
-                        LupaPasswordScreen(
-                            onBackPressed = { navController.popBackStack() },
-                            onResetPasswordSuccess = { navController.popBackStack() }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun LoginScreen(
@@ -240,7 +170,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-
             Button(
                 onClick = {
                     authViewModel.login(email, password)
@@ -265,7 +194,7 @@ fun LoginScreen(
                     CircularProgressIndicator(
                         modifier = Modifier
                             .padding(top = 16.dp)
-//                    .align(Alignment.CenterHorizontally)
+                            .align(Alignment.CenterHorizontally)
                     )
                 }
 

@@ -1,4 +1,4 @@
-package com.example.dipantau.ui.screen.superAdmin
+package com.example.dipantau.ui.screen.adminOrg
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun SuperAdminMainScreen() {
+fun AdminOrgMainScreen() {
     val navItems = listOf(
         SuperAdminNavItem.Dashboard,
         SuperAdminNavItem.Himpunan,

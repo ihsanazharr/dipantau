@@ -25,9 +25,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.dipantau.R
 import com.example.dipantau.model.Resource
-import com.example.dipantau.model.superAdmin.HimpunanData
+import com.example.dipantau.model.Himpunan // Pastikan ini sesuai dengan model Anda
+import com.example.dipantau.model.HimpunanMinimal
 import com.example.dipantau.model.superAdmin.availableLogoColors
-import com.example.dipantau.model.superAdmin.dummyHimpunanData
 import com.example.dipantau.ui.component.card.HimpunanCard
 import com.example.dipantau.ui.theme.ProductSans
 import com.example.dipantau.viewmodel.HimpunanViewModel
@@ -41,7 +41,7 @@ fun KelolaHimpunanScreen(
     val colorScheme = MaterialTheme.colorScheme
     var searchQuery by remember { mutableStateOf("") }
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
-    var selectedHimpunan by remember { mutableStateOf<HimpunanData?>(null) }
+    var selectedHimpunan by remember { mutableStateOf<HimpunanMinimal?>(null) }
 
     val updateState by viewModel.updateHimpunanResult.collectAsState()
     val deleteState by viewModel.deleteHimpunanResult.collectAsState()
@@ -93,24 +93,24 @@ fun KelolaHimpunanScreen(
     val himpunanList = remember(himpunanState) {
         when (val state = himpunanState) {
             is Resource.Success -> state.data.data.map { himpunan ->
-                HimpunanData(
-                    id = himpunan.id.toString(),
-                    nama = himpunan.name,
+                HimpunanMinimal(
+                    id = himpunan.id,
+                    name = himpunan.name,
                     aka = himpunan.aka,
-                    deskripsi = himpunan.description ?: "",
-                    jumlahAnggota = 0,
+                    description = himpunan.description ?: "",
                     logoColor = availableLogoColors.random()
                 )
             }
-            else -> dummyHimpunanData
+            else -> emptyList()
         }
     }
+
 
     val filteredHimpunan = if (searchQuery.isEmpty()) {
         himpunanList
     } else {
         himpunanList.filter {
-            it.nama.contains(searchQuery, ignoreCase = true) ||
+            it.name.contains(searchQuery, ignoreCase = true) ||
                     it.aka.contains(searchQuery, ignoreCase = true)
         }
     }
@@ -263,9 +263,8 @@ fun KelolaHimpunanScreen(
                 ) {
                     items(filteredHimpunan) { himpunan ->
                         HimpunanCard(
-                            himpunan = himpunan,
+                            himpunan = himpunan, // Pastikan ini adalah HimpunanMinimal
                             onEditClick = {
-                                // Navigasi ke halaman edit
                                 navController?.navigate("himpunan/edit/${himpunan.id}")
                             },
                             onDeleteClick = {
@@ -275,6 +274,7 @@ fun KelolaHimpunanScreen(
                         )
                     }
                 }
+
             }
         }
     }
@@ -282,10 +282,10 @@ fun KelolaHimpunanScreen(
     // Dialog konfirmasi hapus
     if (showDeleteConfirmationDialog && selectedHimpunan != null) {
         DeleteConfirmationDialog(
-            himpunanName = selectedHimpunan!!.nama,
+            himpunanName = selectedHimpunan!!.name,
             onDismiss = { showDeleteConfirmationDialog = false },
             onConfirm = {
-                viewModel.deleteHimpunan(selectedHimpunan!!.id.toInt())
+                viewModel.deleteHimpunan(selectedHimpunan!!.id)
                 showDeleteConfirmationDialog = false
             }
         )

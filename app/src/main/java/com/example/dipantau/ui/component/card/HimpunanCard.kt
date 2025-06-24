@@ -16,28 +16,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.dipantau.model.superAdmin.HimpunanData
+import com.example.dipantau.model.Himpunan
+import com.example.dipantau.model.HimpunanMinimal
 import com.example.dipantau.ui.theme.ProductSans
 
 @Composable
 fun HimpunanCard(
-    himpunan: HimpunanData,
+    himpunan: HimpunanMinimal, // Ubah tipe parameter menjadi HimpunanMinimal
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.onPrimary),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Logo Himpunan
@@ -45,7 +43,7 @@ fun HimpunanCard(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(himpunan.logoColor),
+                    .background(himpunan.logoColor ?: Color.Gray), // Gunakan logoColor dari HimpunanMinimal
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -59,11 +57,9 @@ fun HimpunanCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = himpunan.nama,
+                    text = himpunan.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = colorScheme.onTertiary,
@@ -81,8 +77,9 @@ fun HimpunanCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Tampilkan jumlah anggota
                 Text(
-                    text = "${himpunan.jumlahAnggota} Anggota",
+                    text = "0 Anggota", // Ganti dengan jumlah anggota yang sesuai
                     fontSize = 12.sp,
                     color = colorScheme.secondary,
                     fontFamily = ProductSans
@@ -91,9 +88,7 @@ fun HimpunanCard(
 
             // Action Buttons
             Row {
-                IconButton(
-                    onClick = onEditClick
-                ) {
+                IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit",
@@ -101,9 +96,7 @@ fun HimpunanCard(
                     )
                 }
 
-                IconButton(
-                    onClick = onDeleteClick
-                ) {
+                IconButton(onClick = onDeleteClick) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Hapus",

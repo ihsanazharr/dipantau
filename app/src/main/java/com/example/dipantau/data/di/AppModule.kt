@@ -9,6 +9,10 @@ import com.example.dipantau.data.repositories.AuthRepository
 import com.example.dipantau.data.repositories.AuthRepositoryImpl
 import com.example.dipantau.data.repositories.HimpunanRepository
 import com.example.dipantau.data.repositories.HimpunanRepositoryImpl
+import com.example.dipantau.data.repositories.MembershipRepository
+import com.example.dipantau.data.repositories.MembershipRepositoryImpl
+import com.example.dipantau.data.repositories.TaskRepository
+import com.example.dipantau.data.repositories.TaskRepositoryImpl
 import com.example.dipantau.utils.SessionManager
 import dagger.Module
 import dagger.Provides
@@ -56,6 +60,22 @@ object AppModule {
         apiService: ApiService
     ): AdminRepository {
         return AdminRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMembershipRepository(
+        apiService: ApiService
+    ): MembershipRepository {
+        return MembershipRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaskRepository(
+        apiService: ApiService
+    ): TaskRepository {
+        return TaskRepositoryImpl(apiService)
     }
 
 //    @Provides

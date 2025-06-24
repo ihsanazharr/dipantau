@@ -1,21 +1,19 @@
-package com.example.dipantau
+package com.example.dipantau.ui.screen.adminOrg
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.compose.rememberNavController
-import com.example.dipantau.ui.navigation.MainNavGraph
 import com.example.dipantau.ui.theme.DiPantauTheme
+import com.example.dipantau.ui.screen.superAdmin.SuperAdminMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class AdminOrgMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DiPantauTheme {
-                val navController = rememberNavController()
-                MainNavGraph(navController = navController)
+                AdminOrgMainScreen()
             }
         }
     }
